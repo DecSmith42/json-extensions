@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <!--  Packages-->
+  <ItemGroup>
+    <PackageReference Include="Jetbrains.Annotations" Version="2025.2.0"/>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,129 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [ released ]
+  
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  
+  SetupBuildInfo:
+    runs-on: ubuntu-latest
+    outputs:
+      build-name: ${{ steps.SetupBuildInfo.outputs.build-name }}
+      build-id: ${{ steps.SetupBuildInfo.outputs.build-id }}
+      build-version: ${{ steps.SetupBuildInfo.outputs.build-version }}
+      build-timestamp: ${{ steps.SetupBuildInfo.outputs.build-timestamp }}
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: SetupBuildInfo
+        id: SetupBuildInfo
+        run: dotnet run --project _atom/_atom.csproj SetupBuildInfo --skip --headless
+  
+  PackJsonExtensions:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: PackJsonExtensions
+        id: PackJsonExtensions
+        run: dotnet run --project _atom/_atom.csproj PackJsonExtensions --skip --headless
+      
+      - name: Upload DecSm.Extensions.Json
+        uses: actions/upload-artifact@v4
+        with:
+          name: DecSm.Extensions.Json
+          path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json"
+  
+  TestJsonExtensions:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: TestJsonExtensions
+        id: TestJsonExtensions
+        run: dotnet run --project _atom/_atom.csproj TestJsonExtensions --skip --headless
+      
+      - name: Upload DecSm.Extensions.Json.Tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests
+          path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json.Tests"
+  
+  PushToNuget:
+    needs: [ PackJsonExtensions ]
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Download DecSm.Extensions.Json
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json"
+      
+      - name: PushToNuget
+        id: PushToNuget
+        run: dotnet run --project _atom/_atom.csproj PushToNuget --skip --headless
+        env:
+          nuget-push-api-key: ${{ secrets.NUGET_PUSH_API_KEY }}
+  
+  PushToRelease:
+    needs: [ PackJsonExtensions, SetupBuildInfo ]
+    runs-on: ubuntu-latest
+    if: contains(needs.SetupBuildInfo.outputs.build-version, '-') == false
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Download DecSm.Extensions.Json
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json"
+      
+      - name: PushToRelease
+        id: PushToRelease
+        run: dotnet run --project _atom/_atom.csproj PushToRelease --skip --headless
+        env:
+          build-version: ${{ needs.SetupBuildInfo.outputs.build-version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
