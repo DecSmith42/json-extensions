@@ -25,18 +25,15 @@ public sealed class JsonUtilTests
 
         // Act
         var flattened = json.Flatten();
+        using var _ = Assert.EnterMultipleScope();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(6);
-            flattened.ShouldContain(x => x.Key == "name" && x.Value == "John");
-            flattened.ShouldContain(x => x.Key == "age" && x.Value == "30");
-            flattened.ShouldContain(x => x.Key == "address:street" && x.Value == "123 Main St");
-            flattened.ShouldContain(x => x.Key == "address:city" && x.Value == "Anytown");
-            flattened.ShouldContain(x => x.Key == "phones:[0]" && x.Value == "123-456-7890");
-            flattened.ShouldContain(x => x.Key == "phones:[1]" && x.Value == "987-654-3210");
-        });
+        flattened.Count.ShouldBe(6);
+        flattened.ShouldContain(x => x.Key == "name" && x.Value == "John");
+        flattened.ShouldContain(x => x.Key == "age" && x.Value == "30");
+        flattened.ShouldContain(x => x.Key == "address:street" && x.Value == "123 Main St");
+        flattened.ShouldContain(x => x.Key == "address:city" && x.Value == "Anytown");
+        flattened.ShouldContain(x => x.Key == "phones:[0]" && x.Value == "123-456-7890");
+        flattened.ShouldContain(x => x.Key == "phones:[1]" && x.Value == "987-654-3210");
     }
 
     [Test]
@@ -112,15 +109,12 @@ public sealed class JsonUtilTests
 
         // Act
         var flattened = json.Flatten();
+        using var _ = Assert.EnterMultipleScope();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(3);
-            flattened.ShouldContain(x => x.Key == ":[0]" && x.Value == "first");
-            flattened.ShouldContain(x => x.Key == ":[1]" && x.Value == "second");
-            flattened.ShouldContain(x => x.Key == ":[2]" && x.Value == "third");
-        });
+        flattened.Count.ShouldBe(3);
+        flattened.ShouldContain(x => x.Key == ":[0]" && x.Value == "first");
+        flattened.ShouldContain(x => x.Key == ":[1]" && x.Value == "second");
+        flattened.ShouldContain(x => x.Key == ":[2]" && x.Value == "third");
     }
 
     [Test]
@@ -149,17 +143,15 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(6);
-            flattened.ShouldContain(x => x.Key == "matrix:[0]:[0]" && x.Value == "1");
-            flattened.ShouldContain(x => x.Key == "matrix:[0]:[1]" && x.Value == "2");
-            flattened.ShouldContain(x => x.Key == "matrix:[0]:[2]" && x.Value == "3");
-            flattened.ShouldContain(x => x.Key == "matrix:[1]:[0]" && x.Value == "4");
-            flattened.ShouldContain(x => x.Key == "matrix:[1]:[1]" && x.Value == "5");
-            flattened.ShouldContain(x => x.Key == "matrix:[1]:[2]" && x.Value == "6");
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(6);
+        flattened.ShouldContain(x => x.Key == "matrix:[0]:[0]" && x.Value == "1");
+        flattened.ShouldContain(x => x.Key == "matrix:[0]:[1]" && x.Value == "2");
+        flattened.ShouldContain(x => x.Key == "matrix:[0]:[2]" && x.Value == "3");
+        flattened.ShouldContain(x => x.Key == "matrix:[1]:[0]" && x.Value == "4");
+        flattened.ShouldContain(x => x.Key == "matrix:[1]:[1]" && x.Value == "5");
+        flattened.ShouldContain(x => x.Key == "matrix:[1]:[2]" && x.Value == "6");
     }
 
     [Test]
@@ -176,14 +168,12 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(3);
-            flattened.ShouldContain(x => x.Key == "name" && x.Value == "John");
-            flattened.ShouldContain(x => x.Key == "middleName" && x.Value == null);
-            flattened.ShouldContain(x => x.Key == "age" && x.Value == "30");
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(3);
+        flattened.ShouldContain(x => x.Key == "name" && x.Value == "John");
+        flattened.ShouldContain(x => x.Key == "middleName" && x.Value == null);
+        flattened.ShouldContain(x => x.Key == "age" && x.Value == "30");
     }
 
     [Test]
@@ -207,12 +197,10 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(1);
-            flattened.ShouldContain(x => x.Key == "level1:level2:level3:value" && x.Value == "deep");
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(1);
+        flattened.ShouldContain(x => x.Key == "level1:level2:level3:value" && x.Value == "deep");
     }
 
     [Test]
@@ -239,15 +227,13 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(4);
-            flattened.ShouldContain(x => x.Key == "users:[0]:name" && x.Value == "Alice");
-            flattened.ShouldContain(x => x.Key == "users:[0]:age" && x.Value == "25");
-            flattened.ShouldContain(x => x.Key == "users:[1]:name" && x.Value == "Bob");
-            flattened.ShouldContain(x => x.Key == "users:[1]:age" && x.Value == "30");
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(4);
+        flattened.ShouldContain(x => x.Key == "users:[0]:name" && x.Value == "Alice");
+        flattened.ShouldContain(x => x.Key == "users:[0]:age" && x.Value == "25");
+        flattened.ShouldContain(x => x.Key == "users:[1]:name" && x.Value == "Bob");
+        flattened.ShouldContain(x => x.Key == "users:[1]:age" && x.Value == "30");
     }
 
     [Test]
@@ -266,16 +252,14 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(5);
-            flattened.ShouldContain(x => x.Key == "string" && x.Value == "test");
-            flattened.ShouldContain(x => x.Key == "number" && x.Value == "42");
-            flattened.ShouldContain(x => x.Key == "decimal" && x.Value == "3.14");
-            flattened.ShouldContain(x => x.Key == "boolean" && x.Value == "true");
-            flattened.ShouldContain(x => x.Key == "null" && x.Value == null);
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(5);
+        flattened.ShouldContain(x => x.Key == "string" && x.Value == "test");
+        flattened.ShouldContain(x => x.Key == "number" && x.Value == "42");
+        flattened.ShouldContain(x => x.Key == "decimal" && x.Value == "3.14");
+        flattened.ShouldContain(x => x.Key == "boolean" && x.Value == "true");
+        flattened.ShouldContain(x => x.Key == "null" && x.Value == null);
     }
 
     [Test]
@@ -525,12 +509,10 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(1);
-            flattened.ShouldContain(x => x.Key == "" && x.Value == "standalone");
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(1);
+        flattened.ShouldContain(x => x.Key == "" && x.Value == "standalone");
     }
 
     [Test]
@@ -555,12 +537,10 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json!.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(1);
-            flattened.ShouldContain(x => x.Key == "" && x.Value == null);
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(1);
+        flattened.ShouldContain(x => x.Key == "" && x.Value == null);
     }
 
     [Test]
@@ -735,15 +715,13 @@ public sealed class JsonUtilTests
         // Act
         var flattened = json.Flatten();
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            flattened.Count.ShouldBe(4);
-            flattened.ShouldContain(x => x.Key == "items:[0]" && x.Value == "first");
-            flattened.ShouldContain(x => x.Key == "items:[1]" && x.Value == null);
-            flattened.ShouldContain(x => x.Key == "items:[2]" && x.Value == "third");
-            flattened.ShouldContain(x => x.Key == "items:[3]" && x.Value == null);
-        });
+        using var _ = Assert.EnterMultipleScope();
+
+        flattened.Count.ShouldBe(4);
+        flattened.ShouldContain(x => x.Key == "items:[0]" && x.Value == "first");
+        flattened.ShouldContain(x => x.Key == "items:[1]" && x.Value == null);
+        flattened.ShouldContain(x => x.Key == "items:[2]" && x.Value == "third");
+        flattened.ShouldContain(x => x.Key == "items:[3]" && x.Value == null);
     }
 
     [Test]
