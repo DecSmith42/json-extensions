@@ -7,10 +7,10 @@
 
   <!--  Packages-->
   <ItemGroup>
-    <PackageReference Include="DecSm.Atom" Version="1.3.0"/>
-    <PackageReference Include="DecSm.Atom.Module.Dotnet" Version="1.3.0"/>
-    <PackageReference Include="DecSm.Atom.Module.GithubWorkflows" Version="1.3.0"/>
-    <PackageReference Include="DecSm.Atom.Module.GitVersion" Version="1.3.0"/>
+    <PackageReference Include="DecSm.Atom" Version="1.4.0"/>
+    <PackageReference Include="DecSm.Atom.Module.Dotnet" Version="1.4.0"/>
+    <PackageReference Include="DecSm.Atom.Module.GithubWorkflows" Version="1.4.0"/>
+    <PackageReference Include="DecSm.Atom.Module.GitVersion" Version="1.4.0"/>
   </ItemGroup>
 
   <!--  Analyzers-->
