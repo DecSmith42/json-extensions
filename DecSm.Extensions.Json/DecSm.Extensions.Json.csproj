@@ -6,7 +6,7 @@
 
   <!--  Packages-->
   <ItemGroup>
-    <PackageReference Include="Jetbrains.Annotations" Version="2025.2.0"/>
+    <PackageReference Include="Jetbrains.Annotations" Version="2025.2.2"/>
   </ItemGroup>
 
 </Project>
