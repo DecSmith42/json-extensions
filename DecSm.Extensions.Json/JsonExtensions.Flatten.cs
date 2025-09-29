@@ -17,7 +17,7 @@ public static partial class JsonExtensions
     /// </summary>
     /// <param name="node">The JSON node to flatten. Can be a JsonObject, JsonArray, or primitive value.</param>
     /// <returns>
-    ///     A read-only dictionary mapping each path to its string representation.
+    ///     A dictionary mapping each path to its string representation.
     ///     - Keys use colons for object properties and [index] notation for arrays.
     ///     - Values are the string representation of the JSON values (null for JSON null values).
     /// </returns>
@@ -29,17 +29,17 @@ public static partial class JsonExtensions
     /// // Result: [("user:name", "John"), ("user:tags:[0]", "admin"), ("user:tags:[1]", "user")]
     /// ]]></code>
     /// </example>
-    public static IReadOnlyDictionary<string, string?> Flatten(JsonNode node)
+    public static IDictionary<string, string?> Flatten(JsonNode node)
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        var keyLookup = new Dictionary<string, int>();
-        var flattened = new List<KeyValuePair<string, string?>>();
+        var keyLookup = new Dictionary<string, string?>();
+        var flattened = new Dictionary<string, string?>();
         var sb = new StringBuilder(64);
 
         Flatten(node, flattened, keyLookup, sb);
 
-        return flattened.ToDictionary();
+        return flattened;
     }
 
     /// <summary>
@@ -60,8 +60,8 @@ public static partial class JsonExtensions
     /// </remarks>
     private static void Flatten(
         this JsonNode? node,
-        List<KeyValuePair<string, string?>> flattened,
-        Dictionary<string, int> keyLookup,
+        Dictionary<string, string?> flattened,
+        Dictionary<string, string?> keyLookup,
         StringBuilder sb)
     {
         switch (node)
@@ -107,16 +107,16 @@ public static partial class JsonExtensions
             default:
             {
                 var key = sb.ToString();
-                var kvp = new KeyValuePair<string, string?>(key, node?.ToString());
 
                 if (keyLookup.TryGetValue(key, out var existingIndex))
                 {
-                    flattened[existingIndex] = kvp;
+                    if (existingIndex is not null)
+                        flattened[existingIndex] = node?.ToString();
                 }
                 else
                 {
-                    keyLookup[key] = flattened.Count;
-                    flattened.Add(kvp);
+                    flattened.Add(key, node?.ToString());
+                    keyLookup.Add(key, flattened.Count.ToString());
                 }
 
                 break;

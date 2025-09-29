@@ -39,40 +39,21 @@ public static partial class JsonExtensions
         ArgumentNullException.ThrowIfNull(path);
 
         // Ignore empty paths for consistency with batch Replace
-        if (path.Length == 0)
-        {
-            var unchanged = new JsonObject();
-
-            foreach (var kvp in root)
-                unchanged[kvp.Key] = kvp.Value?.DeepClone();
-
-            return unchanged;
-        }
+        if (path.Length is 0)
+            return root;
 
         // If the path doesn't contain colons, handle as a simple key replacement
         if (!path.Contains(':'))
         {
-            var simpleResult = new JsonObject();
-
-            // Copy all existing key-value pairs
-            foreach (var kvp in root)
-                simpleResult[kvp.Key] = kvp.Value?.DeepClone();
-
-            // Replace the specified key with the new value
-            // Don't add it if it doesn't already exist
             if (root.ContainsKey(path))
-                simpleResult[path] = JsonValue.Create(value);
+                root[path] = JsonValue.Create(value);
 
-            return simpleResult;
+            return root;
         }
 
         // Handle nested path replacement
-        var complexResult = root
-            .DeepClone()
-            .AsObject();
-
         var pathSegments = path.Split(':');
-        var current = complexResult;
+        var current = root;
 
         // Navigate to the parent of the target key
         for (var i = 0; i < pathSegments.Length - 1; i++)
@@ -87,6 +68,6 @@ public static partial class JsonExtensions
         var finalKey = pathSegments[^1];
         current[finalKey] = JsonValue.Create(value);
 
-        return complexResult;
+        return root;
     }
 }

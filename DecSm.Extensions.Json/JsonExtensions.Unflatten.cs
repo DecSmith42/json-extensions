@@ -42,7 +42,7 @@ public static partial class JsonExtensions
     ///     - Square brackets with numbers ([0], [1], etc.) indicate array indices
     ///     - Mixed object/array paths are supported (e.g., "users:[0]:name")
     /// </remarks>
-    public static JsonObject Unflatten(IReadOnlyDictionary<string, string?> flattened)
+    public static JsonObject Unflatten(IDictionary<string, string?> flattened)
     {
         ArgumentNullException.ThrowIfNull(flattened);
 
