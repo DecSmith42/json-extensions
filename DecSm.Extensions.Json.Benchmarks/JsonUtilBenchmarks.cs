@@ -94,7 +94,7 @@ public class JsonUtilBenchmarks
     }
 
     [Benchmark(Description = "Flatten: JsonNode -> pairs")]
-    public IReadOnlyDictionary<string, string?> Flatten_Benchmark() =>
+    public IDictionary<string, string?> Flatten_Benchmark() =>
         JsonExtensions.Flatten(_jsonNode);
 
     [Benchmark(Description = "Unflatten: pairs -> JsonObject")]

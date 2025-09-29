@@ -5,7 +5,7 @@
 ///     Path conventions:
 ///     - Object properties are separated by colons (e.g., "user:address:city").
 ///     - Arrays are addressed with bracketed indices (e.g., "users:[0]:name") in flattened/unflattened keys.
-///     - For in-place replacement via <see cref="ReplaceValues" />, array steps use bare numeric segments (e.g., "users:0:name").
+///     - For in-place replacement via <see cref="ReplaceValues(JsonObject,Dictionary{string,string}, string)" />, array steps use bare numeric segments (e.g., "users:0:name").
 ///     These helpers are allocation‑conscious and designed for clarity when manipulating JSON in config and ETL scenarios.
 /// </summary>
 public static partial class JsonExtensions
@@ -16,9 +16,10 @@ public static partial class JsonExtensions
     ///     use bracket notation with zero-based indices.
     /// </summary>
     /// <param name="node">The JSON node to flatten. Can be a JsonObject, JsonArray, or primitive value.</param>
+    /// <param name="separator">The separator character to use between object property segments. Default is ':'.</param>
     /// <returns>
-    ///     A read-only dictionary mapping each path to its string representation.
-    ///     - Keys use colons for object properties and [index] notation for arrays.
+    ///     A dictionary mapping each path to its string representation.
+    ///     - Keys use <see ref="separator"/> for object properties and [index] notation for arrays.
     ///     - Values are the string representation of the JSON values (null for JSON null values).
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="node" /> is null.</exception>
@@ -29,17 +30,17 @@ public static partial class JsonExtensions
     /// // Result: [("user:name", "John"), ("user:tags:[0]", "admin"), ("user:tags:[1]", "user")]
     /// ]]></code>
     /// </example>
-    public static IReadOnlyDictionary<string, string?> Flatten(JsonNode node)
+    public static IDictionary<string, string?> Flatten(JsonNode node, string separator = ":")
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        var keyLookup = new Dictionary<string, int>();
-        var flattened = new List<KeyValuePair<string, string?>>();
+        var keyLookup = new Dictionary<string, string?>();
+        var flattened = new Dictionary<string, string?>();
         var sb = new StringBuilder(64);
 
-        Flatten(node, flattened, keyLookup, sb);
+        Flatten(node, flattened, keyLookup, sb, separator);
 
-        return flattened.ToDictionary();
+        return flattened;
     }
 
     /// <summary>
@@ -50,6 +51,7 @@ public static partial class JsonExtensions
     /// <param name="flattened">The list to add flattened key-value pairs to.</param>
     /// <param name="keyLookup">Dictionary for O(1) key lookups to avoid duplicates.</param>
     /// <param name="sb">A reusable StringBuilder holding the current path being built.</param>
+    /// <param name="separator">The separator character to use between object property segments.</param>
     /// <remarks>
     ///     The method handles three cases:
     ///     - JsonArray: Iterates through elements with [index] notation
@@ -60,16 +62,18 @@ public static partial class JsonExtensions
     /// </remarks>
     private static void Flatten(
         this JsonNode? node,
-        List<KeyValuePair<string, string?>> flattened,
-        Dictionary<string, int> keyLookup,
-        StringBuilder sb)
+        Dictionary<string, string?> flattened,
+        Dictionary<string, string?> keyLookup,
+        StringBuilder sb,
+        string separator)
     {
         switch (node)
         {
             case JsonArray array:
             {
                 var baseLen = sb.Length;
-                sb.Append(":[");
+                sb.Append(separator);
+                sb.Append('[');
                 var indexStart = sb.Length;
 
                 for (var i = 0; i < array.Count; i++)
@@ -77,7 +81,7 @@ public static partial class JsonExtensions
                     sb.Length = indexStart;
                     sb.Append(i);
                     sb.Append(']');
-                    Flatten(array[i], flattened, keyLookup, sb);
+                    Flatten(array[i], flattened, keyLookup, sb, separator);
                 }
 
                 sb.Length = baseLen;
@@ -89,7 +93,7 @@ public static partial class JsonExtensions
                 var baseLen = sb.Length;
 
                 if (baseLen > 0)
-                    sb.Append(':');
+                    sb.Append(separator);
 
                 var keyStart = sb.Length;
 
@@ -97,7 +101,7 @@ public static partial class JsonExtensions
                 {
                     sb.Length = keyStart;
                     sb.Append(pair.Key);
-                    Flatten(pair.Value, flattened, keyLookup, sb);
+                    Flatten(pair.Value, flattened, keyLookup, sb, separator);
                 }
 
                 sb.Length = baseLen;
@@ -107,16 +111,16 @@ public static partial class JsonExtensions
             default:
             {
                 var key = sb.ToString();
-                var kvp = new KeyValuePair<string, string?>(key, node?.ToString());
 
                 if (keyLookup.TryGetValue(key, out var existingIndex))
                 {
-                    flattened[existingIndex] = kvp;
+                    if (existingIndex is not null)
+                        flattened[existingIndex] = node?.ToString();
                 }
                 else
                 {
-                    keyLookup[key] = flattened.Count;
-                    flattened.Add(kvp);
+                    flattened.Add(key, node?.ToString());
+                    keyLookup.Add(key, flattened.Count.ToString());
                 }
 
                 break;

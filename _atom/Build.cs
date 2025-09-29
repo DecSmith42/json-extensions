@@ -72,7 +72,6 @@ internal partial class Build : DefaultBuildDefinition,
                         $"run --project {JsonExtensionsBenchmarkProjectName} --configuration Release")
                     {
                         WorkingDirectory = FileSystem.AtomRootDirectory,
-                        OutputLogLevel = LogLevel.Information,
                     },
                     cancellationToken);
 

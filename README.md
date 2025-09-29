@@ -35,7 +35,7 @@ using DecSm.Extensions.Json;
 ```csharp
 var json = JsonNode.Parse("""{ "user": { "name": "John", "tags": ["admin", "user"] } }""")!;
 var flattened = JsonExtensions.Flatten(json);
-// flattened is an IReadOnlyDictionary<string, string?> like:
+// flattened is an IDictionary<string, string?> like:
 // [
 //   ("user:name", "John"),
 //   ("user:tags:[0]", "admin"),
@@ -57,7 +57,7 @@ var obj = JsonExtensions.Unflatten(flat);
 // {"user":{"name":"John","tags":["admin","user"]}}
 ```
 
-### Replace a single value (returns a new object)
+### Replace a single value in-place
 
 ```csharp
 var root = JsonNode.Parse("""{ "user": { "details": { "city": "NYC" } } }""")!.AsObject();
