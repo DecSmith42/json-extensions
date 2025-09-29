@@ -9,16 +9,17 @@ public static partial class JsonExtensions
     /// <param name="replacements">
     ///     A mapping from path to new value. Paths can be:
     ///     - Simple property names (e.g., "name"). Only updated if the property exists on the root.
-    ///     - Colon-separated nested paths (e.g., "user:address:city").
+    ///     - <see ref="separator"/>-separated nested paths (e.g., "user:address:city").
     ///     - Paths that step into arrays using bare numeric segments only (e.g., "users:0:name").
     ///     Note: Bracketed indices like "[0]" are ignored by this method.
     /// </param>
+    /// <param name="separator">The segment separator to use for nested paths. Defaults to colon (":").</param>
     /// <returns>The same <see cref="JsonObject" /> instance passed in, after modifications.</returns>
     /// <remarks>
     ///     Behavior:
     ///     - No new properties or containers are created; only existing ones are updated.
-    ///     - For colon-separated paths, the method first attempts to traverse the structure. If traversal fails
-    ///     but the root contains a literal property equal to the remaining colon-joined path, that property is updated.
+    ///     - For <see ref="separator"/>-separated paths, the method first attempts to traverse the structure. If traversal fails
+    ///     but the root contains a literal property equal to the remaining <see ref="separator"/>-joined path, that property is updated.
     ///     - Array indices must exist and be within bounds to be updated.
     ///     - Values are stored using <see cref="JsonValue.Create(string?, JsonNodeOptions?)" /> which preserves nulls.
     ///     - This method modifies the input object in-place.
@@ -35,7 +36,7 @@ public static partial class JsonExtensions
     /// });
     /// ]]></code>
     /// </example>
-    public static JsonObject ReplaceValues(this JsonObject root, Dictionary<string, string?> replacements)
+    public static JsonObject ReplaceValues(this JsonObject root, Dictionary<string, string?> replacements, string separator = ":")
     {
         ArgumentNullException.ThrowIfNull(replacements);
 
@@ -44,11 +45,11 @@ public static partial class JsonExtensions
             if (key.Length is 0)
                 continue;
 
-            // If key contains ':', attempt nested update first (preserve nested structure if it exists),
+            // If key contains separator, attempt nested update first (preserve nested structure if it exists),
             // otherwise fall back to literal property update on the root if it exists.
-            if (key.Contains(':'))
+            if (key.Contains(separator))
             {
-                if (TrySetNestedIfExists(root, key, newValue))
+                if (TrySetNestedIfExists(root, key, newValue, separator))
                     continue;
 
                 if (root.TryGetPropertyValue(key, out _))
@@ -66,16 +67,17 @@ public static partial class JsonExtensions
     }
 
     /// <summary>
-    ///     Helper that attempts to set a value using a colon-separated path, only when the full path exists.
+    ///     Helper that attempts to set a value using a separated path, only when the full path exists.
     ///     Supports stepping through objects and arrays (numeric segments). Does not create missing nodes.
     /// </summary>
     /// <param name="root">The root object to start from.</param>
-    /// <param name="colonPath">A colon-separated path. Array positions can be specified using numeric segments.</param>
+    /// <param name="path">A separated path. Array positions can be specified using numeric segments.</param>
     /// <param name="value">The value to set (null for JSON null).</param>
+    /// <param name="separator">The segment separator to use.</param>
     /// <returns><c>true</c> if the value was set; otherwise, <c>false</c>.</returns>
-    private static bool TrySetNestedIfExists(JsonObject root, string colonPath, string? value)
+    private static bool TrySetNestedIfExists(JsonObject root, string path, string? value, string separator)
     {
-        var parts = colonPath.Split(':');
+        var parts = path.Split(separator);
 
         if (parts.Length == 0)
             return false;
@@ -97,8 +99,8 @@ public static partial class JsonExtensions
                     }
 
                     // Fallback: if the nested object path doesn't exist, check if the current object
-                    // contains a literal property with the remaining colon-joined path and update it.
-                    var remainingPath = string.Join(':', parts[i..]);
+                    // contains a literal property with the remaining joined path and update it.
+                    var remainingPath = string.Join(separator, parts[i..]);
 
                     if (!obj.TryGetPropertyValue(remainingPath, out _))
                         return false;

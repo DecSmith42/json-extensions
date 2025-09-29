@@ -7,20 +7,21 @@ public static partial class JsonExtensions
     /// </summary>
     /// <param name="root">The source JSON object to read from.</param>
     /// <param name="path">
-    ///     The property path to replace. Use colon-separated segments for nested objects
+    ///     The property path to replace. Use <see ref="separator"/>-separated segments for nested objects
     ///     (e.g., "user:address:city"). Array indices are not supported by this method.
-    ///     If the path contains no colons, it is treated as a simple, root-level property name.
+    ///     If the path contains no <see ref="separator"/>s, it is treated as a simple, root-level property name.
     /// </param>
     /// <param name="value">The new value to assign at the specified path. Use <c>null</c> for JSON null.</param>
+    /// <param name="separator">The separator used to split path segments. Defaults to colon (":").</param>
     /// <returns>
     ///     A new <see cref="JsonObject" /> with the requested change applied, leaving the original object unchanged.
-    ///     For simple paths (no colons), the property is only replaced if it already exists; missing properties are not added.
-    ///     For colon-separated paths, only existing intermediate objects are traversed; missing segments are not created.
+    ///     For simple paths (no <see ref="separator"/>s), the property is only replaced if it already exists; missing properties are not added.
+    ///     For <see ref="separator"/>-separated paths, only existing intermediate objects are traversed; missing segments are not created.
     ///     If a segment is missing, the value is set on the last navigated object (potentially the root) under the final segment name.
     /// </returns>
     /// <remarks>
     ///     This method is intentionally conservative about creating structure. If you need conditional creation and
-    ///     support for arrays, see <see cref="ReplaceValues" />.
+    ///     support for arrays, see <see cref="M:DecSm.Extensions.Json.JsonExtensions.ReplaceValues(JsonObject,Dictionary{string,string},string)" />.
     ///     Setting <paramref name="value" /> to null results in a JSON null at the target path.
     ///     If <paramref name="root" /> is null, a <see cref="NullReferenceException" /> will be thrown by extension method invocation semantics.
     /// </remarks>
@@ -34,7 +35,7 @@ public static partial class JsonExtensions
     /// // Unchanged structure; returns a clone with no new property added.
     /// ]]></code>
     /// </example>
-    public static JsonObject ReplaceValue(this JsonObject root, string path, string? value)
+    public static JsonObject ReplaceValue(this JsonObject root, string path, string? value, string separator = ":")
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -42,8 +43,8 @@ public static partial class JsonExtensions
         if (path.Length is 0)
             return root;
 
-        // If the path doesn't contain colons, handle as a simple key replacement
-        if (!path.Contains(':'))
+        // If the path doesn't contain separator, handle as a simple key replacement
+        if (!path.Contains(separator))
         {
             if (root.ContainsKey(path))
                 root[path] = JsonValue.Create(value);
@@ -52,7 +53,7 @@ public static partial class JsonExtensions
         }
 
         // Handle nested path replacement
-        var pathSegments = path.Split(':');
+        var pathSegments = path.Split(separator);
         var current = root;
 
         // Navigate to the parent of the target key
