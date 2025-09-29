@@ -60,9 +60,19 @@ jobs:
       - name: TestJsonExtensions
         id: TestJsonExtensions
         run: dotnet run --project _atom/_atom.csproj TestJsonExtensions --skip --headless
+  
+  BenchmarkJsonExtensions:
+    runs-on: ubuntu-latest
+    steps:
       
-      - name: Upload DecSm.Extensions.Json.Tests
-        uses: actions/upload-artifact@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          name: DecSm.Extensions.Json.Tests
-          path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json.Tests"
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: BenchmarkJsonExtensions
+        id: BenchmarkJsonExtensions
+        run: dotnet run --project _atom/_atom.csproj BenchmarkJsonExtensions --skip --headless

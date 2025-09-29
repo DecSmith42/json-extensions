@@ -1,14 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <!--  Packages-->
   <ItemGroup>
-    <PackageReference Include="Jetbrains.Annotations" Version="2025.2.2" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
   </ItemGroup>
 
   <!--  Analyzers-->
@@ -21,6 +20,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <!--  Project References-->
+  <ItemGroup>
+    <ProjectReference Include="..\DecSm.Extensions.Json\DecSm.Extensions.Json.csproj"/>
   </ItemGroup>
 
 </Project>
