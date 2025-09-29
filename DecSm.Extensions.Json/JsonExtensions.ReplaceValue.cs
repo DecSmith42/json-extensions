@@ -1,0 +1,92 @@
+﻿namespace DecSm.Extensions.Json;
+
+public static partial class JsonExtensions
+{
+    /// <summary>
+    ///     Replaces the value at a specified path within a JSON object, returning a new object.
+    /// </summary>
+    /// <param name="root">The source JSON object to read from.</param>
+    /// <param name="path">
+    ///     The property path to replace. Use colon-separated segments for nested objects
+    ///     (e.g., "user:address:city"). Array indices are not supported by this method.
+    ///     If the path contains no colons, it is treated as a simple, root-level property name.
+    /// </param>
+    /// <param name="value">The new value to assign at the specified path. Use <c>null</c> for JSON null.</param>
+    /// <returns>
+    ///     A new <see cref="JsonObject" /> with the requested change applied, leaving the original object unchanged.
+    ///     For simple paths (no colons), the property is only replaced if it already exists; missing properties are not added.
+    ///     For colon-separated paths, only existing intermediate objects are traversed; missing segments are not created.
+    ///     If a segment is missing, the value is set on the last navigated object (potentially the root) under the final segment name.
+    /// </returns>
+    /// <remarks>
+    ///     This method is intentionally conservative about creating structure. If you need conditional creation and
+    ///     support for arrays, see <see cref="ReplaceValues" />.
+    ///     Setting <paramref name="value" /> to null results in a JSON null at the target path.
+    ///     If <paramref name="root" /> is null, a <see cref="NullReferenceException" /> will be thrown by extension method invocation semantics.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="path" /> is null.</exception>
+    /// <example>
+    ///     <code><![CDATA[
+    /// var obj = JsonNode.Parse("""{ "user": { "name": "John" } }""").AsObject();
+    /// var updated = obj.ReplaceValue("user:name", "Jane");
+    /// // {"user":{"name":"Jane"}}
+    /// var rootOnly = obj.ReplaceValue("unknown", "x");
+    /// // Unchanged structure; returns a clone with no new property added.
+    /// ]]></code>
+    /// </example>
+    public static JsonObject ReplaceValue(this JsonObject root, string path, string? value)
+    {
+        ArgumentNullException.ThrowIfNull(path);
+
+        // Ignore empty paths for consistency with batch Replace
+        if (path.Length == 0)
+        {
+            var unchanged = new JsonObject();
+
+            foreach (var kvp in root)
+                unchanged[kvp.Key] = kvp.Value?.DeepClone();
+
+            return unchanged;
+        }
+
+        // If the path doesn't contain colons, handle as a simple key replacement
+        if (!path.Contains(':'))
+        {
+            var simpleResult = new JsonObject();
+
+            // Copy all existing key-value pairs
+            foreach (var kvp in root)
+                simpleResult[kvp.Key] = kvp.Value?.DeepClone();
+
+            // Replace the specified key with the new value
+            // Don't add it if it doesn't already exist
+            if (root.ContainsKey(path))
+                simpleResult[path] = JsonValue.Create(value);
+
+            return simpleResult;
+        }
+
+        // Handle nested path replacement
+        var complexResult = root
+            .DeepClone()
+            .AsObject();
+
+        var pathSegments = path.Split(':');
+        var current = complexResult;
+
+        // Navigate to the parent of the target key
+        for (var i = 0; i < pathSegments.Length - 1; i++)
+        {
+            var segment = pathSegments[i];
+
+            if (current[segment] is JsonObject nestedObj)
+                current = nestedObj;
+        }
+
+        // Set the value at the final path segment
+        var finalKey = pathSegments[^1];
+        current[finalKey] = JsonValue.Create(value);
+
+        return complexResult;
+    }
+}

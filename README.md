@@ -1,168 +1,141 @@
 ﻿# DecSm.Extensions.Json
 
-A C# library providing JSON utility extensions and helper methods.
+Lightweight, allocation-conscious helpers for working with System.Text.Json.Nodes. Provides a simple, human-readable path notation to:
+- Flatten JSON into path/value pairs
+- Unflatten path/value pairs back to JSON
+- Replace a single value by path
+- Apply many in-place replacements by path
 
-## Overview
+The library targets .NET 8.0 and 9.0.
 
-DecSm.Extensions.Json is a .NET library that extends JSON functionality with useful utilities and helper methods.
+## Install
 
-## Requirements
-
-- .NET 9.0 or later
-
-## Getting Started
-
-Install the package via NuGet:
+From your project directory:
 
 ```bash
 dotnet add package DecSm.Extensions.Json
 ```
 
-## Features
+## Getting started
 
-### JSON Flattening and Unflattening
-
-Convert between hierarchical JSON structures and flat key-value pairs using colon-separated path notation.
-
-#### Flatten JSON Structure
-
-Transform nested JSON objects and arrays into flat key-value pairs:
+The helpers operate on System.Text.Json.Nodes (JsonObject, JsonArray, JsonValue). Add these using statements:
 
 ```csharp
+using System.Text.Json.Nodes;
 using DecSm.Extensions.Json;
-
-var json = new
-{
-    Name = "John",
-    Address = new
-    {
-        Street = "123 Main St",
-        City = "Anytown"
-    },
-    Tags = new[] { "tag1", "tag2" }
-};
-
-var flattened = json.Flatten();
-
-// Result:
-// {
-//     "Name": "John",
-//     "Address:Street": "123 Main St",
-//     "Address:City": "Anytown",
-//     "Tags:0": "tag1",
-//     "Tags:1": "tag2"
-// }
 ```
 
-#### Unflatten JSON Structure
+### Path conventions
+- Object properties are separated by colons, e.g. `user:address:city`.
+- Arrays use bracketed indices when flattening/unflattening, e.g. `users:[0]:name`.
+- For in-place replacement (ReplaceValues), arrays use bare numeric segments only, e.g. `users:0:name`.
 
-Convert flat key-value pairs back into a hierarchical JSON structure:
+### Flatten a JSON node
 
 ```csharp
-using DecSm.Extensions.Json;
-
-var flatJson = new Dictionary<string, object>
-{
-    { "Name", "John" },
-    { "Address:Street", "123 Main St" },
-    { "Address:City", "Anytown" },
-    { "Tags:0", "tag1" },
-    { "Tags:1", "tag2" }
-};
-
-var unflattened = flatJson.Unflatten();
-
-// Result:
-// {
-//     "Name": "John",
-//     "Address": {
-//         "Street": "123 Main St",
-//         "City": "Anytown"
-//     },
-//     "Tags": ["tag1", "tag2"]
-// }
+var json = JsonNode.Parse("""{ "user": { "name": "John", "tags": ["admin", "user"] } }""")!;
+var flattened = JsonExtensions.Flatten(json);
+// flattened is an IReadOnlyDictionary<string, string?> like:
+// [
+//   ("user:name", "John"),
+//   ("user:tags:[0]", "admin"),
+//   ("user:tags:[1]", "user")
+// ]
 ```
 
-### JSON Value Replacement
-
-Replace values in a JSON object based on a specified key path:
+### Unflatten to a JSON object
 
 ```csharp
-using DecSm.Extensions.Json;
-
-var json = new
+var flat = new Dictionary<string, string?>
 {
-    Name = "John",
-    Address = new
-    {
-        Street = "123 Main St",
-        City = "Anytown"
-    }
+    ["user:name"] = "John",
+    ["user:tags:[0]"] = "admin",
+    ["user:tags:[1]"] = "user",
 };
-
-var updatedJson = json.ReplaceValue("Address:City", "Newtown");
-
-// Result:
-// {
-//     "Name": "John",
-//     "Address": {
-//         "Street": "123 Main St",
-//         "City": "Newtown"
-//     }
-// }
+var obj = JsonExtensions.Unflatten(flat);
+// obj is a JsonObject:
+// {"user":{"name":"John","tags":["admin","user"]}}
 ```
 
-## Development
+### Replace a single value (returns a new object)
 
-### Prerequisites
+```csharp
+var root = JsonNode.Parse("""{ "user": { "details": { "city": "NYC" } } }""")!.AsObject();
+var updated = root.ReplaceValue("user:details:city", "LA");
+// updated: {"user":{"details":{"city":"LA"}}}
+// Notes:
+// - Only existing objects are traversed; missing segments are not created.
+// - This method does not step into arrays.
+// - Setting value to null writes a JSON null.
+```
 
-- .NET 9.0 SDK
-- A compatible IDE (Visual Studio, JetBrains Rider, VS Code)
-- [Atom](https://github.com/decsm/atom) Tool (`dotnet tool install -g decsm.atom`)
+### Apply many replacements in-place
 
-### Building the Project
+```csharp
+var root2 = JsonNode.Parse("""
+{
+  "name": "A",
+  "user": { "address": { "city": "NYC" } },
+  "users": [ { "name": "Alice" }, { "name": "Bob" } ]
+}
+""")!.AsObject();
 
-This project uses [Atom](https://github.com/decsm/atom) for building and managing dependencies. To build the project,
-run:
+root2.ReplaceValues(new Dictionary<string, string?>
+{
+    ["name"] = "B",                 // root-level property if present
+    ["user:address:city"] = "LA",   // nested object path if present
+    ["users:1:name"] = "Robert",    // arrays use bare numeric segments
+});
+// root2 is modified in-place
+```
+
+Important notes for ReplaceValues:
+- No new properties/containers are created; only existing ones are updated.
+- If a nested path can’t be fully traversed, but the root contains a literal property equal to the remaining colon-joined path, that property is updated.
+- Bracketed indices like `[0]` are ignored by ReplaceValues; use bare numeric segments (`users:0:name`).
+
+## Projects in this repo
+- DecSm.Extensions.Json — the library
+- DecSm.Extensions.Json.Tests — unit tests (NUnit + Shouldly)
+- DecSm.Extensions.Json.Benchmarks — microbenchmarks (BenchmarkDotNet)
+- _atom — Atom build definition and GitHub workflow generation
+
+## Build, test, and benchmarks with Atom
+This repository uses [Atom](https://github.com/decsm/atom) for local automation and CI workflows.
+
+Install Atom as a global .NET tool:
 
 ```bash
+dotnet tool install -g decsm.atom.tool
+```
+
+Run tasks from the repository root:
+
+```bash
+# Pack the NuGet package
 atom PackJsonExtensions
+
+# Run unit tests
+atom TestJsonExtensions
+
+# Run benchmarks (BenchmarkDotNet); reports are published under _publish/DecSm.Extensions.Json.Benchmarks
+atom BenchmarkJsonExtensions
 ```
 
-### Running Tests
-
-To run the tests, use the following command:
+## Build and test with the .NET CLI (without Atom)
 
 ```bash
-atom TestJsonExtensions
+# Build the solution
+dotnet build -c Release
+
+# Run tests
+dotnet test DecSm.Extensions.Json.Tests -c Release
 ```
 
-### Code Style
-
-This project follows standard C# coding conventions and uses an `.editorconfig` file to maintain consistent formatting
-across different editors.
-
-### Versioning
-
-This project uses GitVersion for automatic versioning based on Git history. The configuration is defined in
-`GitVersion.yml`.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add or update tests as necessary
-5. Ensure all tests pass
-6. Submit a pull request
-
-## Project Configuration
-
-- **Target Framework**: .NET 9.0
-- **Language Version**: C# 14.0
-- **Build Configuration**: Defined in `Directory.Build.props`
-- **Global Settings**: Configured in `global.json`
+## Requirements
+- .NET SDK 9.0 or later
+- Library targets: net8.0; net9.0;
 
 ## License
 
-This project is licensed under the MIT License. [See the LICENSE file for more details.](LICENSE.txt).
+This project is licensed under the MIT License. See LICENSE.txt for details.

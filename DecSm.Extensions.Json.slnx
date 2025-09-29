@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="DecSm.Extensions.Json.Benchmarks\DecSm.Extensions.Json.Benchmarks.csproj" Type="Classic C#" />
+  <Project Path="DecSm.Extensions.Json.Tests\DecSm.Extensions.Json.Tests.csproj" Type="Classic C#" />
+  <Project Path="DecSm.Extensions.Json\DecSm.Extensions.Json.csproj" Type="Classic C#" />
+  <Project Path="_atom\_atom.csproj" Type="Classic C#" />
+</Solution>
