@@ -39,7 +39,8 @@ internal partial class Build : DefaultBuildDefinition,
         d => d
             .DescribedAs("Builds the DecSm.Extensions.Json project into a NuGet package")
             .ProducesArtifact(JsonExtensionsProjectName)
-            .Executes(async cancellationToken => await DotnetPackProject(new(JsonExtensionsProjectName), cancellationToken));
+            .Executes(async cancellationToken =>
+                await DotnetPackProject(new(JsonExtensionsProjectName), cancellationToken));
 
     private Target TestJsonExtensions =>
         d => d

@@ -9,7 +9,7 @@ public static partial class JsonExtensions
     /// <param name="replacements">
     ///     A mapping from path to new value. Paths can be:
     ///     - Simple property names (e.g., "name"). Only updated if the property exists on the root.
-    ///     - <see ref="separator"/>-separated nested paths (e.g., "user:address:city").
+    ///     - <see ref="separator" />-separated nested paths (e.g., "user:address:city").
     ///     - Paths that step into arrays using bare numeric segments only (e.g., "users:0:name").
     ///     Note: Bracketed indices like "[0]" are ignored by this method.
     /// </param>
@@ -18,8 +18,10 @@ public static partial class JsonExtensions
     /// <remarks>
     ///     Behavior:
     ///     - No new properties or containers are created; only existing ones are updated.
-    ///     - For <see ref="separator"/>-separated paths, the method first attempts to traverse the structure. If traversal fails
-    ///     but the root contains a literal property equal to the remaining <see ref="separator"/>-joined path, that property is updated.
+    ///     - For <see ref="separator" />-separated paths, the method first attempts to traverse the structure. If traversal
+    ///     fails
+    ///     but the root contains a literal property equal to the remaining <see ref="separator" />-joined path, that property
+    ///     is updated.
     ///     - Array indices must exist and be within bounds to be updated.
     ///     - Values are stored using <see cref="JsonValue.Create(string?, JsonNodeOptions?)" /> which preserves nulls.
     ///     - This method modifies the input object in-place.
@@ -36,7 +38,10 @@ public static partial class JsonExtensions
     /// });
     /// ]]></code>
     /// </example>
-    public static JsonObject ReplaceValues(this JsonObject root, Dictionary<string, string?> replacements, string separator = ":")
+    public static JsonObject ReplaceValues(
+        this JsonObject root,
+        Dictionary<string, string?> replacements,
+        string separator = ":")
     {
         ArgumentNullException.ThrowIfNull(replacements);
 
