@@ -45,7 +45,12 @@ public static partial class JsonExtensions
     /// </remarks>
     public static JsonObject Unflatten(IDictionary<string, string?> flattened, string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(flattened);
+        #else
+        if (flattened is null)
+            throw new ArgumentNullException(nameof(flattened));
+        #endif
 
         var obj = new JsonObject();
 

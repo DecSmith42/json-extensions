@@ -33,7 +33,12 @@ public static partial class JsonExtensions
     /// </example>
     public static IDictionary<string, string?> Flatten(JsonNode node, string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(node);
+        #else
+        if (node is null)
+            throw new ArgumentNullException(nameof(node));
+        #endif
 
         var keyLookup = new Dictionary<string, string?>();
         var flattened = new Dictionary<string, string?>();

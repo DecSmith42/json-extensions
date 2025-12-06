@@ -43,7 +43,12 @@ public static partial class JsonExtensions
         Dictionary<string, string?> replacements,
         string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(replacements);
+        #else
+        if (replacements is null)
+            throw new ArgumentNullException(nameof(replacements));
+        #endif
 
         foreach (var (key, newValue) in replacements)
         {
@@ -105,10 +110,11 @@ public static partial class JsonExtensions
 
                     // Fallback: if the nested object path doesn't exist, check if the current object
                     // contains a literal property with the remaining joined path and update it.
+                    #if NET8_0_OR_GREATER
                     var remainingPath = string.Join(separator, parts[i..]);
-
-                    if (!obj.TryGetPropertyValue(remainingPath, out _))
-                        return false;
+                    #else
+                    var remainingPath = string.Join(separator, parts.Skip(i));
+                    #endif
 
                     obj[remainingPath] = JsonValue.Create(value);
 

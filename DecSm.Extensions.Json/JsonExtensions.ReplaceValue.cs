@@ -42,7 +42,12 @@ public static partial class JsonExtensions
     /// </example>
     public static JsonObject ReplaceValue(this JsonObject root, string path, string? value, string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(path);
+        #else
+        if (path is null)
+            throw new ArgumentNullException(nameof(path));
+        #endif
 
         // Ignore empty paths for consistency with batch Replace
         if (path.Length is 0)
