@@ -5,7 +5,8 @@
 ///     Path conventions:
 ///     - Object properties are separated by colons (e.g., "user:address:city").
 ///     - Arrays are addressed with bracketed indices (e.g., "users:[0]:name") in flattened/unflattened keys.
-///     - For in-place replacement via <see cref="ReplaceValues(JsonObject,Dictionary{string,string}, string)" />, array steps use bare numeric segments (e.g., "users:0:name").
+///     - For in-place replacement via <see cref="ReplaceValues(JsonObject,Dictionary{string,string}, string)" />, array
+///     steps use bare numeric segments (e.g., "users:0:name").
 ///     These helpers are allocation‑conscious and designed for clarity when manipulating JSON in config and ETL scenarios.
 /// </summary>
 public static partial class JsonExtensions
@@ -19,7 +20,7 @@ public static partial class JsonExtensions
     /// <param name="separator">The separator character to use between object property segments. Default is ':'.</param>
     /// <returns>
     ///     A dictionary mapping each path to its string representation.
-    ///     - Keys use <see ref="separator"/> for object properties and [index] notation for arrays.
+    ///     - Keys use <see ref="separator" /> for object properties and [index] notation for arrays.
     ///     - Values are the string representation of the JSON values (null for JSON null values).
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="node" /> is null.</exception>
@@ -32,7 +33,12 @@ public static partial class JsonExtensions
     /// </example>
     public static IDictionary<string, string?> Flatten(JsonNode node, string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(node);
+        #else
+        if (node is null)
+            throw new ArgumentNullException(nameof(node));
+        #endif
 
         var keyLookup = new Dictionary<string, string?>();
         var flattened = new Dictionary<string, string?>();
@@ -88,6 +94,7 @@ public static partial class JsonExtensions
 
                 break;
             }
+
             case JsonObject obj:
             {
                 var baseLen = sb.Length;
@@ -108,6 +115,7 @@ public static partial class JsonExtensions
 
                 break;
             }
+
             default:
             {
                 var key = sb.ToString();

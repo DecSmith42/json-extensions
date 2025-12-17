@@ -36,9 +36,15 @@ internal sealed class RoundTripTests
         // Act
         var flattened = JsonExtensions.Flatten(original);
 
+        #if NET8_0_OR_GREATER
         var roundTrip = JsonExtensions.Unflatten(flattened
             .Select(x => new KeyValuePair<string, string?>(x.Key, x.Value))
             .ToDictionary());
+        #else
+        var roundTrip = JsonExtensions.Unflatten(flattened
+            .Select(x => new KeyValuePair<string, string?>(x.Key, x.Value))
+            .ToDictionary(pair => pair.Key, pair => pair.Value));
+        #endif
 
         // Assert
         JsonNode

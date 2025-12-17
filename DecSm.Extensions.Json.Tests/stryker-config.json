@@ -1,0 +1,10 @@
+﻿{
+  "stryker-config":
+  {
+    "reporters": [
+      "progress",
+      "html"
+    ],
+    "project": "DecSm.Extensions.Json.csproj"
+  }
+}

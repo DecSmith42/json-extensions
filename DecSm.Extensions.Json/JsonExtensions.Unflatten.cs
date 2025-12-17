@@ -4,12 +4,12 @@ public static partial class JsonExtensions
 {
     /// <summary>
     ///     Reconstructs a hierarchical JSON object from flattened key-value pairs.
-    ///     This method reverses the flattening process by parsing <see ref="separator"/>-separated paths
+    ///     This method reverses the flattening process by parsing <see ref="separator" />-separated paths
     ///     and bracket notation to rebuild the original nested structure.
     /// </summary>
     /// <param name="flattened">
     ///     An enumerable of tuples containing flattened key-value pairs where:
-    ///     - Key: Path string using <see ref="separator"/> separation for objects and [index] notation for arrays
+    ///     - Key: Path string using <see ref="separator" /> separation for objects and [index] notation for arrays
     ///     - Value: String representation of the value (null for JSON null values)
     /// </param>
     /// <param name="separator">The separator character used between object property segments (default is ':').</param>
@@ -39,13 +39,18 @@ public static partial class JsonExtensions
     ///     - Overwriting existing values when the same path is encountered multiple times
     ///     - Note: Array indices are applied in append order; sparse/non-sequential indices are not padded.
     ///     Path parsing rules:
-    ///     - <see ref="separator"/> separate object property names
+    ///     - <see ref="separator" /> separate object property names
     ///     - Square brackets with numbers ([0], [1], etc.) indicate array indices
     ///     - Mixed object/array paths are supported (e.g., "users:[0]:name")
     /// </remarks>
     public static JsonObject Unflatten(IDictionary<string, string?> flattened, string separator = ":")
     {
+        #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(flattened);
+        #else
+        if (flattened is null)
+            throw new ArgumentNullException(nameof(flattened));
+        #endif
 
         var obj = new JsonObject();
 

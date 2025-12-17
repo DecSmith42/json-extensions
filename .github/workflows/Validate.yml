@@ -1,5 +1,6 @@
 name: Validate
 
+permissions: { }
 on:
   workflow_dispatch:
   pull_request:
@@ -23,13 +24,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
       - name: SetupBuildInfo
         id: SetupBuildInfo
         run: dotnet run --project _atom/_atom.csproj SetupBuildInfo --skip --headless
   
-  PackJsonExtensions:
+  Pack:
     runs-on: ubuntu-latest
     steps:
       
@@ -39,14 +40,18 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
-      - name: PackJsonExtensions
-        id: PackJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj PackJsonExtensions --skip --headless
+      - name: Pack
+        id: Pack
+        run: dotnet run --project _atom/_atom.csproj Pack --skip --headless
   
-  TestJsonExtensions:
-    runs-on: ubuntu-latest
+  Test:
+    strategy:
+      matrix:
+        job-runs-on: [ windows-latest, ubuntu-latest, macos-latest ]
+        test-framework: [ net8.0, net9.0, net10.0 ]
+    runs-on: ${{ matrix.job-runs-on }}
     steps:
       
       - name: Checkout
@@ -55,24 +60,18 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
-      
-      - name: TestJsonExtensions
-        id: TestJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj TestJsonExtensions --skip --headless
-  
-  BenchmarkJsonExtensions:
-    runs-on: ubuntu-latest
-    steps:
-      
-      - name: Checkout
-        uses: actions/checkout@v4
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-dotnet@v4
         with:
-          fetch-depth: 0
+          dotnet-version: '8.0.x'
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
       
-      - name: BenchmarkJsonExtensions
-        id: BenchmarkJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj BenchmarkJsonExtensions --skip --headless
+      - name: Test
+        id: Test
+        run: dotnet run --project _atom/_atom.csproj Test --skip --headless
+        env:
+          job-runs-on: ${{ matrix.job-runs-on }}
+          test-framework: ${{ matrix.test-framework }}
+          build-slice: ${{ matrix.job-runs-on }}-${{ matrix.test-framework }}

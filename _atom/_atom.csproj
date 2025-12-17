@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Atom</RootNamespace>
   </PropertyGroup>
 
   <!--  Packages-->
   <ItemGroup>
-    <PackageReference Include="DecSm.Atom" Version="1.5.0" />
-    <PackageReference Include="DecSm.Atom.Module.Dotnet" Version="1.5.0" />
-    <PackageReference Include="DecSm.Atom.Module.GithubWorkflows" Version="1.5.0" />
-    <PackageReference Include="DecSm.Atom.Module.GitVersion" Version="1.5.0" />
+    <PackageReference Include="DecSm.Atom" Version="2.0.0-rc.210" />
+    <PackageReference Include="DecSm.Atom.Module.Dotnet" Version="2.0.0-rc.210" />
+    <PackageReference Include="DecSm.Atom.Module.GithubWorkflows" Version="2.0.0-rc.210" />
+    <PackageReference Include="DecSm.Atom.Module.GitVersion" Version="2.0.0-rc.210" />
   </ItemGroup>
 
   <!--  Analyzers-->
   <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.14.0">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.14.0">
+    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
