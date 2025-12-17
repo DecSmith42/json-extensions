@@ -67,7 +67,9 @@ internal interface ITargets : IDotnetPackHelper, IDotnetTestHelper, INugetHelper
             .ConsumesVariable(nameof(SetupBuildInfo), nameof(BuildVersion))
             .RequiresParam(nameof(NugetFeed), nameof(NugetApiKey))
             .ConsumesArtifacts(nameof(Pack), ProjectsToPack)
-            .ConsumesArtifacts(nameof(Test), ProjectsToTest)
+            .ConsumesArtifacts(nameof(Test),
+                ProjectsToTest,
+                PlatformNames.SelectMany(platform => FrameworkNames.Select(framework => $"{platform}-{framework}")))
             .Executes(async () =>
             {
                 foreach (var projectName in ProjectsToPack.Concat(ProjectsToTest))

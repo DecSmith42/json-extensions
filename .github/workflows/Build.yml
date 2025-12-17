@@ -143,7 +143,55 @@ jobs:
       - name: Download DecSm.Extensions.Json.Tests
         uses: actions/download-artifact@v4
         with:
-          name: DecSm.Extensions.Json.Tests
+          name: DecSm.Extensions.Json.Tests-windows-latest-net8.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-windows-latest-net9.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-windows-latest-net10.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-ubuntu-latest-net8.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-ubuntu-latest-net9.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-ubuntu-latest-net10.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-macos-latest-net8.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-macos-latest-net9.0
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests-macos-latest-net10.0
           path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
       
       - name: PushToRelease
