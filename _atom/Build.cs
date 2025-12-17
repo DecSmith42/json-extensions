@@ -39,6 +39,7 @@ internal partial class Build : BuildDefinition, IGithubWorkflows, IGitVersion, I
                     .WithOptions(new SetupDotnetStep("8.0.x"), new SetupDotnetStep("9.0.x")),
             ],
             WorkflowTypes = [Github.WorkflowType],
+            Options = [GithubTokenPermissionsOption.NoneAll],
         },
         new("Build")
         {
@@ -63,13 +64,17 @@ internal partial class Build : BuildDefinition, IGithubWorkflows, IGitVersion, I
                 WorkflowTargets.PushToNuget.WithOptions(WorkflowSecretInjection.Create(Params.NugetApiKey)),
                 WorkflowTargets
                     .PushToRelease
-                    .WithGithubTokenInjection()
+                    .WithGithubTokenInjection(new()
+                    {
+                        Contents = GithubTokenPermission.Write,
+                    })
                     .WithOptions(GithubIf.Create(new ConsumedVariableExpression(nameof(ISetupBuildInfo.SetupBuildInfo),
                             ParamDefinitions[nameof(ISetupBuildInfo.BuildVersion)].ArgName)
                         .Contains(new StringExpression("-"))
                         .EqualTo("false"))),
             ],
             WorkflowTypes = [Github.WorkflowType],
+            Options = [GithubTokenPermissionsOption.NoneAll],
         },
         Github.DependabotDefaultWorkflow(),
     ];

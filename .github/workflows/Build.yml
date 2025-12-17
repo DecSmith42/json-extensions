@@ -1,5 +1,6 @@
 name: Build
 
+permissions: { }
 on:
   workflow_dispatch:
   release:
@@ -121,6 +122,8 @@ jobs:
     needs: [ Pack, Test, SetupBuildInfo ]
     runs-on: ubuntu-latest
     if: contains(needs.SetupBuildInfo.outputs.build-version, '-') == false
+    permissions:
+      contents: write
     steps:
       
       - name: Checkout
