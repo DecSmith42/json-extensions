@@ -3,6 +3,8 @@
     <Product>Dec's Json Extensions</Product>
     <Authors>Declan Smith</Authors>
 
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageDescription>Json Extensions</PackageDescription>
     <EnablePackageValidation>true</EnablePackageValidation>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

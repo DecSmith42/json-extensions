@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - 'main'
+      - 'feature/**'
+      - 'patch/**'
 
 jobs:
   
@@ -26,13 +28,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
       - name: SetupBuildInfo
         id: SetupBuildInfo
         run: dotnet run --project _atom/_atom.csproj SetupBuildInfo --skip --headless
   
-  PackJsonExtensions:
+  Pack:
     runs-on: ubuntu-latest
     steps:
       
@@ -42,11 +44,11 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
-      - name: PackJsonExtensions
-        id: PackJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj PackJsonExtensions --skip --headless
+      - name: Pack
+        id: Pack
+        run: dotnet run --project _atom/_atom.csproj Pack --skip --headless
       
       - name: Upload DecSm.Extensions.Json
         uses: actions/upload-artifact@v4
@@ -54,8 +56,12 @@ jobs:
           name: DecSm.Extensions.Json
           path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json"
   
-  TestJsonExtensions:
-    runs-on: ubuntu-latest
+  Test:
+    strategy:
+      matrix:
+        job-runs-on: [ windows-latest, ubuntu-latest, macos-latest ]
+        test-framework: [ net8.0, net9.0, net10.0 ]
+    runs-on: ${{ matrix.job-runs-on }}
     steps:
       
       - name: Checkout
@@ -64,42 +70,30 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-dotnet@v4
+        with:
           dotnet-version: '9.0.x'
       
-      - name: TestJsonExtensions
-        id: TestJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj TestJsonExtensions --skip --headless
+      - name: Test
+        id: Test
+        run: dotnet run --project _atom/_atom.csproj Test --skip --headless
+        env:
+          job-runs-on: ${{ matrix.job-runs-on }}
+          test-framework: ${{ matrix.test-framework }}
+          build-slice: ${{ matrix.job-runs-on }}-${{ matrix.test-framework }}
       
       - name: Upload DecSm.Extensions.Json.Tests
         uses: actions/upload-artifact@v4
         with:
-          name: DecSm.Extensions.Json.Tests
+          name: DecSm.Extensions.Json.Tests-${{ matrix.job-runs-on }}-${{ matrix.test-framework }}
           path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json.Tests"
   
-  BenchmarkJsonExtensions:
-    runs-on: ubuntu-latest
-    steps:
-      
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-      
-      - name: BenchmarkJsonExtensions
-        id: BenchmarkJsonExtensions
-        run: dotnet run --project _atom/_atom.csproj BenchmarkJsonExtensions --skip --headless
-      
-      - name: Upload DecSm.Extensions.Json.Benchmarks
-        uses: actions/upload-artifact@v4
-        with:
-          name: DecSm.Extensions.Json.Benchmarks
-          path: "${{ github.workspace }}/.github/publish/DecSm.Extensions.Json.Benchmarks"
-  
   PushToNuget:
-    needs: [ PackJsonExtensions ]
+    needs: [ Test, Pack ]
     runs-on: ubuntu-latest
     steps:
       
@@ -109,7 +103,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
       - name: Download DecSm.Extensions.Json
         uses: actions/download-artifact@v4
@@ -124,7 +118,7 @@ jobs:
           nuget-push-api-key: ${{ secrets.NUGET_PUSH_API_KEY }}
   
   PushToRelease:
-    needs: [ PackJsonExtensions, SetupBuildInfo ]
+    needs: [ Pack, Test, SetupBuildInfo ]
     runs-on: ubuntu-latest
     if: contains(needs.SetupBuildInfo.outputs.build-version, '-') == false
     steps:
@@ -135,13 +129,19 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       
       - name: Download DecSm.Extensions.Json
         uses: actions/download-artifact@v4
         with:
           name: DecSm.Extensions.Json
           path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json"
+      
+      - name: Download DecSm.Extensions.Json.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: DecSm.Extensions.Json.Tests
+          path: "${{ github.workspace }}/.github/artifacts/DecSm.Extensions.Json.Tests"
       
       - name: PushToRelease
         id: PushToRelease

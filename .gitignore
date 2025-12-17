@@ -1,13 +1,6 @@
 # Atom
 atom-publish
 
-# JetBrains Rider
-*.sln.iml
-.idea
-
-# VS Code
-.vscode/
-
 # User-specific files
 *.rsuser
 *.suo
@@ -399,3 +392,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# JetBrains Rider
+*.sln.iml
+.idea
+
+# VS Code
+.vscode/
