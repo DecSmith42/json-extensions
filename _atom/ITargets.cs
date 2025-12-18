@@ -65,7 +65,6 @@ internal interface ITargets : IDotnetPackHelper, IDotnetTestHelper, INugetHelper
             .DescribedAs("Pushes artifacts to a GitHub release")
             .RequiresParam(nameof(GithubToken))
             .ConsumesVariable(nameof(SetupBuildInfo), nameof(BuildVersion))
-            .RequiresParam(nameof(NugetFeed), nameof(NugetApiKey))
             .ConsumesArtifacts(nameof(Pack), ProjectsToPack)
             .ConsumesArtifacts(nameof(Test),
                 ProjectsToTest,
